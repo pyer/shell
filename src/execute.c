@@ -2,54 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/wait.h>
-#include <pwd.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
+#include "builtins.h"
 #include "signals.h"
 #include "syntax.h"
 
-/* Manage memory
- */
-void free_memory(int argc, char** argv)
-{
-    for (int i = 0; i < argc; i++)
-        free(argv[i]);
-    free(argv);
-}
-
-/* Builtin command
- */
-bool builtin_command(int argc, char** argv)
-{
-    if (strcmp(argv[0], "cd") == 0) {
-      if (argc == 1) {
-		    struct passwd *pw = getpwuid(getuid());
-		    const char *homedir = pw->pw_dir;
-		    chdir(homedir);
-	    } else if (argc == 2) {
-        if (chdir(argv[1]) != 0) {
-            perror(argv[1]);
-        }
-      } else {
-        perror("cd: Too many arguments\n");
-      }
-    } else if(strcmp(argv[0], "bye") == 0) {
-      free_memory(argc, argv);
-		  exit(0);
-	  } else if(strcmp(argv[0], "exit") == 0) {
-      free_memory(argc, argv);
-		  exit(0);
-	  } else {
-      return false;
-    }
-    return true;
-}
-
-/* External command
- */
-void execute_simple_command(TreeNode* simple_cmd_node,
+void execute_simple_command(Node* simple_cmd_node,
                              bool stdin_pipe,
                              bool stdout_pipe,
                              int pipe_read,
@@ -67,7 +28,7 @@ void execute_simple_command(TreeNode* simple_cmd_node,
       return;
 
     // Init argc and argv
-    TreeNode* argNode = simple_cmd_node;
+    Node* argNode = simple_cmd_node;
     int i = 0;
     while (argNode != NULL && (argNode->type == NODE_ARGUMENT || argNode->type == NODE_COMMAND)) {
         argNode = argNode->right;
@@ -142,7 +103,7 @@ void execute_simple_command(TreeNode* simple_cmd_node,
     free_memory(argc, argv);
 }
 
-void execute_command(TreeNode* cmdNode,
+void execute_command(Node* cmdNode,
                       bool stdin_pipe,
                       bool stdout_pipe,
                       int pipe_read,
@@ -183,7 +144,7 @@ void execute_command(TreeNode* cmdNode,
     }
 }
 
-void execute_pipeline(TreeNode* t)
+void execute_pipeline(Node* t)
 {
     int file_desc[2];
 
@@ -193,7 +154,7 @@ void execute_pipeline(TreeNode* t)
 
 	// read input from stdin for the first job
     execute_command(t->left, false, true, 0, pipewrite);
-    TreeNode* jobNode = t->right;
+    Node* jobNode = t->right;
 
     while (jobNode != NULL && jobNode->type == NODE_PIPE)
     {
@@ -216,7 +177,7 @@ void execute_pipeline(TreeNode* t)
     close(piperead);
 }
 
-void execute_syntax_tree(TreeNode* t)
+void execute_syntax_tree(Node* t)
 {
     if (t->type == NODE_PIPE) {
         execute_pipeline(t);

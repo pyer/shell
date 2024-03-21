@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -m64 -I./src
 
-default: main.o lexer.o parser.o syntax.o execute.o signals.o
-	$(CC) $(CFLAGS) main.o lexer.o parser.o syntax.o execute.o signals.o -o shell
+default: main.o lexer.o parser.o syntax.o execute.o builtins.o signals.o
+	$(CC) $(CFLAGS) main.o lexer.o parser.o syntax.o execute.o builtins.o signals.o -o shell
 #	@rm *.o
 
 main.o: src/main.c src/lexer.h src/parser.h src/execute.h src/signals.h
@@ -17,8 +17,11 @@ parser.o: src/parser.c src/parser.h
 syntax.o: src/syntax.c src/syntax.h
 	$(CC) $(CFLAGS) -c src/syntax.c 
 
-execute.o: src/execute.c src/execute.h src/syntax.h src/signals.h
+execute.o: src/execute.c src/execute.h src/syntax.h src/builtins.h src/signals.h
 	$(CC) $(CFLAGS) -c src/execute.c
+
+builtins.o: src/builtins.h
+	$(CC) $(CFLAGS) -c src/builtins.c
 
 signals.o: src/signals.c src/signals.h
 	$(CC) $(CFLAGS) -c src/signals.c

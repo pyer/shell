@@ -6,9 +6,9 @@
 /* Syntax tree management */
 
 
-TreeNode* createNodePipe(TreeNode* leftNode, TreeNode* rightNode)
+Node* createNodePipe(Node* leftNode, Node* rightNode)
 {
-  TreeNode* node = malloc(sizeof(*node));
+  Node* node = malloc(sizeof(*node));
   assert(node != NULL);
   node->type  = NODE_PIPE;
   node->left  = leftNode;
@@ -17,9 +17,9 @@ TreeNode* createNodePipe(TreeNode* leftNode, TreeNode* rightNode)
   return node;
 }
 
-TreeNode* createNodeRedirectIn(char* data, TreeNode* rightNode)
+Node* createNodeRedirectIn(char* data, Node* rightNode)
 {
-  TreeNode* node = malloc(sizeof(*node));
+  Node* node = malloc(sizeof(*node));
   assert(node != NULL);
   node->type  = NODE_REDIRECT_IN;
   node->left  = NULL;
@@ -28,9 +28,9 @@ TreeNode* createNodeRedirectIn(char* data, TreeNode* rightNode)
   return node;
 }
 
-TreeNode* createNodeRedirectOut(char* data, TreeNode* rightNode)
+Node* createNodeRedirectOut(char* data, Node* rightNode)
 {
-  TreeNode* node = malloc(sizeof(*node));
+  Node* node = malloc(sizeof(*node));
   assert(node != NULL);
   node->type  = NODE_REDIRECT_OUT;
   node->left  = NULL;
@@ -39,9 +39,9 @@ TreeNode* createNodeRedirectOut(char* data, TreeNode* rightNode)
   return node;
 }
 
-TreeNode* createNodeArgument(char *argument, TreeNode* tokenListNode)
+Node* createNodeArgument(char *argument, Node* tokenListNode)
 {
-  TreeNode* node = malloc(sizeof(*node));
+  Node* node = malloc(sizeof(*node));
   assert(node != NULL);
   node->type  = NODE_ARGUMENT;
   node->left  = NULL;
@@ -50,9 +50,9 @@ TreeNode* createNodeArgument(char *argument, TreeNode* tokenListNode)
   return node;
 }
 
-TreeNode* createNodeCommand(char *command, TreeNode* tokenListNode)
+Node* createNodeCommand(char *command, Node* tokenListNode)
 {
-  TreeNode* node = malloc(sizeof(*node));
+  Node* node = malloc(sizeof(*node));
   assert(node != NULL);
   node->type  = NODE_COMMAND;
   node->left  = NULL;
@@ -61,7 +61,7 @@ TreeNode* createNodeCommand(char *command, TreeNode* tokenListNode)
   return node;
 }
 
-void deleteNode(TreeNode* node)
+void deleteNode(Node* node)
 {
   if (node != NULL) {
     if (node->szData != NULL) {

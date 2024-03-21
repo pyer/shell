@@ -9,21 +9,21 @@ enum {
     NODE_ARGUMENT,
 };
 
-typedef struct TreeNode
+typedef struct Node
 {
     int type;
     char* szData;
-    struct TreeNode* left;
-    struct TreeNode* right;
+    struct Node* left;
+    struct Node* right;
 
-} TreeNode;
+} Node;
 
-TreeNode* createNodePipe(TreeNode* leftNode, TreeNode* rightNode);
-TreeNode* createNodeRedirectIn(char* data, TreeNode* rightNode);
-TreeNode* createNodeRedirectOut(char* data, TreeNode* rightNode);
-TreeNode* createNodeArgument(char *argument, TreeNode* tokenListNode);
-TreeNode* createNodeCommand(char *command, TreeNode* tokenListNode);
+Node* createNodePipe(Node* leftNode, Node* rightNode);
+Node* createNodeRedirectIn(char* data, Node* rightNode);
+Node* createNodeRedirectOut(char* data, Node* rightNode);
+Node* createNodeArgument(char *argument, Node* tokenListNode);
+Node* createNodeCommand(char *command, Node* tokenListNode);
 
-void deleteNode(TreeNode* node);
+void deleteNode(Node* node);
 
 #endif

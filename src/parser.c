@@ -24,14 +24,14 @@
  *
 **/
 
-TreeNode* CMD();      // test all command production orderwise
-TreeNode* CMD1();     // <simple command> '<' <filename>
-TreeNode* CMD2();     // <simple command> '>' <filename>
+Node* CMD();      // test all command production orderwise
+Node* CMD1();     // <simple command> '<' <filename>
+Node* CMD2();     // <simple command> '>' <filename>
 
-TreeNode* SIMPLECMD();
-TreeNode* TOKENLIST();
-TreeNode* TOKENLIST1();  //  <token> <token list>
-TreeNode* TOKENLIST2();  //  EMPTY
+Node* SIMPLECMD();
+Node* TOKENLIST();
+Node* TOKENLIST1();  //  <token> <token list>
+Node* TOKENLIST2();  //  EMPTY
 
 // current_token token pointer
 token_t* current_token = NULL;
@@ -55,10 +55,10 @@ bool term(int token_type, char** bufferptr)
   return false;
 }
 
-TreeNode* CMD()
+Node* CMD()
 {
     token_t* save = current_token;
-    TreeNode* node = CMD1();
+    Node* node = CMD1();
     if (node != NULL)
         return node;
 
@@ -70,9 +70,9 @@ TreeNode* CMD()
     return SIMPLECMD();
 }
 
-TreeNode* CMD1()
+Node* CMD1()
 {
-  TreeNode* simplecmdNode = SIMPLECMD();
+  Node* simplecmdNode = SIMPLECMD();
   if (simplecmdNode == NULL)
     return NULL;
 
@@ -91,9 +91,9 @@ TreeNode* CMD1()
   return createNodeRedirectIn(filename, simplecmdNode);
 }
 
-TreeNode* CMD2()
+Node* CMD2()
 {
-    TreeNode* simplecmdNode;
+    Node* simplecmdNode;
 
     if ((simplecmdNode = SIMPLECMD()) == NULL)
         return NULL;
@@ -113,22 +113,22 @@ TreeNode* CMD2()
   return createNodeRedirectOut(filename, simplecmdNode);
 }
 
-TreeNode* SIMPLECMD()
+Node* SIMPLECMD()
 {
     char* pathname;
     if (!term(TT_TOKEN, &pathname))
         return NULL;
 
-    TreeNode* tokenListNode = TOKENLIST();
+    Node* tokenListNode = TOKENLIST();
     // we don't check whether tokenlistNode is NULL since its a valid grammer
     return createNodeCommand(pathname, tokenListNode);
 }
 
-TreeNode* TOKENLIST()
+Node* TOKENLIST()
 {
     token_t* save = current_token;
 
-    TreeNode* node;
+    Node* node;
 
     if ((current_token = save, node = TOKENLIST1()) != NULL)
         return node;
@@ -139,10 +139,10 @@ TreeNode* TOKENLIST()
     return NULL;
 }
 
-TreeNode* TOKENLIST1()
+Node* TOKENLIST1()
 {
-    TreeNode* tokenListNode;
-    TreeNode* result;
+    Node* tokenListNode;
+    Node* result;
 
     char* arg;
     if (!term(TT_TOKEN, &arg))
@@ -154,30 +154,15 @@ TreeNode* TOKENLIST1()
     return result;
 }
 
-TreeNode* TOKENLIST2()
+Node* TOKENLIST2()
 {
     return NULL;
 }
 
-
-
-/*
-TreeNode* TOKENLIST()
+Node* parse_tokens()
 {
-    char* arg;
-    if (!term(TT_TOKEN, &arg))
-        return NULL;
-
-    TreeNode* tokenListNode = TOKENLIST();
-    // we don't check whether tokenlistNode is NULL since its a valid grammer
-    return createNodeArgument(arg, tokenListNode);
-}
-*/
-
-TreeNode* parse_tokens()
-{
-    TreeNode* cmdNode;
-    TreeNode* jobNode;
+    Node* cmdNode;
+    Node* jobNode;
     token_t* save = current_token;
 
     cmdNode = CMD();
@@ -205,9 +190,8 @@ TreeNode* parse_tokens()
     return createNodePipe(cmdNode, jobNode);
 }
 
-TreeNode* parser_build_syntax_tree(token_t* token)
+Node* parser_build_syntax_tree(token_t* token)
 {
-  //puts("parse");
     if (token == NULL)
       return NULL;
     if (strlen(token->data) == 0)
@@ -215,7 +199,7 @@ TreeNode* parser_build_syntax_tree(token_t* token)
   
     current_token = token;
 
-    TreeNode* syntax_tree = parse_tokens();
+    Node* syntax_tree = parse_tokens();
   
     if (current_token != NULL && current_token->type != TT_TOKEN) {
         printf("Syntax Error near: %s\n", current_token->data);
@@ -225,14 +209,8 @@ TreeNode* parser_build_syntax_tree(token_t* token)
   return syntax_tree;
 }
 
-void parser_show_syntax_tree(TreeNode* ptr)
+void parser_show_syntax_tree(Node* ptr)
 {
-  /*
-    int type;
-    char* szData;
-    struct TreeNode* left;
-    struct TreeNode* right;
-*/
   if (ptr != NULL) {
     printf("%d : %zu --> left=%zu right=%zu data='%s'\n", ptr->type, ptr, ptr->left, ptr->right, ptr->szData);
     parser_show_syntax_tree(ptr->left);
@@ -240,3 +218,4 @@ void parser_show_syntax_tree(TreeNode* ptr)
   }
 
 }
+

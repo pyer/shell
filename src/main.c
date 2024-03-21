@@ -14,7 +14,7 @@ char *prompt = "> ";
 
 void interpret_line(char* linebuffer, size_t len) {
   token_t *first_token = NULL;
-  TreeNode* root = NULL;
+  Node* root = NULL;
 
   // lexically analyze and build a list of tokens
   first_token = lexer_build(linebuffer, len);
