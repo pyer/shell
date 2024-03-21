@@ -1,0 +1,227 @@
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <pwd.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include "signals.h"
+#include "syntax.h"
+
+/* Manage memory
+ */
+void free_memory(int argc, char** argv)
+{
+    for (int i = 0; i < argc; i++)
+        free(argv[i]);
+    free(argv);
+}
+
+/* Builtin command
+ */
+bool builtin_command(int argc, char** argv)
+{
+    if (strcmp(argv[0], "cd") == 0) {
+      if (argc == 1) {
+		    struct passwd *pw = getpwuid(getuid());
+		    const char *homedir = pw->pw_dir;
+		    chdir(homedir);
+	    } else if (argc == 2) {
+        if (chdir(argv[1]) != 0) {
+            perror(argv[1]);
+        }
+      } else {
+        perror("cd: Too many arguments\n");
+      }
+    } else if(strcmp(argv[0], "bye") == 0) {
+      free_memory(argc, argv);
+		  exit(0);
+	  } else if(strcmp(argv[0], "exit") == 0) {
+      free_memory(argc, argv);
+		  exit(0);
+	  } else {
+      return false;
+    }
+    return true;
+}
+
+/* External command
+ */
+void execute_simple_command(TreeNode* simple_cmd_node,
+                             bool stdin_pipe,
+                             bool stdout_pipe,
+                             int pipe_read,
+                             int pipe_write,
+                             char* redirect_in,
+                             char* redirect_out
+                            )
+{
+    int argc;
+    char** argv;
+
+    if (simple_cmd_node == NULL)
+      return;
+    if (simple_cmd_node->type != NODE_COMMAND)
+      return;
+
+    // Init argc and argv
+    TreeNode* argNode = simple_cmd_node;
+    int i = 0;
+    while (argNode != NULL && (argNode->type == NODE_ARGUMENT || argNode->type == NODE_COMMAND)) {
+        argNode = argNode->right;
+        i++;
+    }
+    argv = (char**)malloc(sizeof(char*) * (i + 1));
+
+    argNode = simple_cmd_node;
+    i = 0;
+    while (argNode != NULL && (argNode->type == NODE_ARGUMENT || argNode->type == NODE_COMMAND)) {
+        argv[i] = (char*)malloc(strlen(argNode->szData) + 1);
+        strcpy(argv[i], argNode->szData);
+        argNode = argNode->right;
+        i++;
+    }
+    argv[i] = NULL;
+    argc = i;
+
+    // check for built-in commands
+    if (builtin_command(argc, argv)) {
+      free_memory(argc, argv);
+      return;
+    }
+
+    // Execute the command
+    pid_t pid;
+    if((pid = fork()) == 0 ) {
+		    // restore the signals in the child process
+        set_sigint_handler();
+		    // store the stdout file desc
+        int stdoutfd = dup(STDOUT_FILENO);
+
+        // redirect stdin from file if specified
+        if (redirect_in) {
+            int fd = open(redirect_in, O_RDONLY);
+            if (fd == -1) {
+                perror(redirect_in);
+                exit(1);
+            }
+            dup2(fd, STDIN_FILENO);
+        }
+        // redirect stdout to file if specified
+        if (redirect_out) {
+            int fd = open(redirect_out, O_WRONLY | O_CREAT | O_TRUNC,
+                          S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+            if (fd == -1) {
+                perror(redirect_out);
+                exit(1);
+            }
+            dup2(fd, STDOUT_FILENO);
+        }
+        // read stdin from pipe if present
+        if (stdin_pipe)
+            dup2(pipe_read, STDIN_FILENO);
+        // write stdout to pipe if present
+        if (stdout_pipe)
+            dup2(pipe_write, STDOUT_FILENO);
+
+        if (execvp(argv[0], argv) == -1) {
+			      // restore the stdout for displaying error message
+            dup2(stdoutfd, STDOUT_FILENO);
+            printf("Command not found: \'%s\'\n", argv[0]);
+			      exit(1);
+        }
+    } else if (pid < 0) {
+        perror("fork");
+    } else {
+        // wait till the process has not finished
+        while (waitpid(pid, NULL, 0) <= 0);
+    }
+    // Free allocated memory
+    free_memory(argc, argv);
+}
+
+void execute_command(TreeNode* cmdNode,
+                      bool stdin_pipe,
+                      bool stdout_pipe,
+                      int pipe_read,
+                      int pipe_write)
+{
+    if (cmdNode == NULL)
+        return;
+
+    switch (cmdNode->type)
+    {
+    case NODE_REDIRECT_IN:		// right side contains simple cmd node
+        execute_simple_command(cmdNode->right,
+                               stdin_pipe,
+                               stdout_pipe,
+                               pipe_read,
+                               pipe_write,
+                               cmdNode->szData, NULL
+                              );
+        break;
+    case NODE_REDIRECT_OUT:		// right side contains simple cmd node
+        execute_simple_command(cmdNode->right,
+                               stdin_pipe,
+                               stdout_pipe,
+                               pipe_read,
+                               pipe_write,
+                               NULL, cmdNode->szData
+                              );
+        break;
+    case NODE_COMMAND:
+        execute_simple_command(cmdNode,
+                               stdin_pipe,
+                               stdout_pipe,
+                               pipe_read,
+                               pipe_write,
+                               NULL, NULL
+                              );
+        break;
+    }
+}
+
+void execute_pipeline(TreeNode* t)
+{
+    int file_desc[2];
+
+    pipe(file_desc);
+    int pipewrite = file_desc[1];
+    int piperead = file_desc[0];
+
+	// read input from stdin for the first job
+    execute_command(t->left, false, true, 0, pipewrite);
+    TreeNode* jobNode = t->right;
+
+    while (jobNode != NULL && jobNode->type == NODE_PIPE)
+    {
+        close(pipewrite); // close the write end
+        pipe(file_desc);
+        pipewrite = file_desc[1];
+
+        execute_command(jobNode->left, true, true, piperead, pipewrite);
+        close(piperead);
+        piperead = file_desc[0];
+
+        jobNode = jobNode->right;
+    }
+
+    piperead = file_desc[0];
+    close(pipewrite);
+	
+	// write output to stdout for the last job
+    execute_command(jobNode, true, false, piperead, 0);	// only wait for the last command if necessary
+    close(piperead);
+}
+
+void execute_syntax_tree(TreeNode* t)
+{
+    if (t->type == NODE_PIPE) {
+        execute_pipeline(t);
+    } else {
+        execute_command(t, false, false, 0, 0);
+    }
+}
+
