@@ -16,7 +16,8 @@ void execute_simple_command(Node* simple_cmd_node,
                              int pipe_read,
                              int pipe_write,
                              char* redirect_in,
-                             char* redirect_out
+                             char* redirect_out,
+                             bool append
                             )
 {
     int argc;
@@ -72,8 +73,11 @@ void execute_simple_command(Node* simple_cmd_node,
         }
         // redirect stdout to file if specified
         if (redirect_out) {
-            int fd = open(redirect_out, O_WRONLY | O_CREAT | O_TRUNC,
-                          S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+            int flags = O_WRONLY | O_CREAT | O_TRUNC;
+            if (append) {
+                flags = O_WRONLY | O_CREAT | O_APPEND;
+            }
+            int fd = open(redirect_out, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
             if (fd == -1) {
                 perror(redirect_out);
                 exit(1);
@@ -120,7 +124,8 @@ void execute_command(Node* cmdNode,
                                stdout_pipe,
                                pipe_read,
                                pipe_write,
-                               cmdNode->szData, NULL
+                               cmdNode->szData, NULL,
+                               false
                               );
         break;
     case NODE_REDIRECT_OUT:		// right side contains simple cmd node
@@ -129,7 +134,18 @@ void execute_command(Node* cmdNode,
                                stdout_pipe,
                                pipe_read,
                                pipe_write,
-                               NULL, cmdNode->szData
+                               NULL, cmdNode->szData,
+                               false
+                              );
+        break;
+    case NODE_REDIRECT_OUT_APPEND:
+        execute_simple_command(cmdNode->right,
+                               stdin_pipe,
+                               stdout_pipe,
+                               pipe_read,
+                               pipe_write,
+                               NULL, cmdNode->szData,
+                               true
                               );
         break;
     case NODE_COMMAND:
@@ -138,7 +154,8 @@ void execute_command(Node* cmdNode,
                                stdout_pipe,
                                pipe_read,
                                pipe_write,
-                               NULL, NULL
+                               NULL, NULL,
+                               false
                               );
         break;
     }

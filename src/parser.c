@@ -12,6 +12,7 @@
 
   <command>         ::= <simple command> '<' <filename>
                       | <simple command> '>' <filename>
+                      | <simple command> ">>" <filename>
                       | <simple command>
 
   <simple command>  ::= <pathname> <token list>
@@ -27,6 +28,7 @@
 Node* CMD();      // test all command production orderwise
 Node* CMD1();     // <simple command> '<' <filename>
 Node* CMD2();     // <simple command> '>' <filename>
+Node* CMD3();     // <simple command> ">>" <filename>
 
 Node* SIMPLECMD();
 Node* TOKENLIST();
@@ -40,7 +42,7 @@ bool term(int token_type, char** bufferptr)
 {
   if (current_token == NULL)
     return false;
-  
+
   //printf("term: %d - %d\n", current_token->type, token_type);
   if (current_token->type == token_type) {
     if (bufferptr != NULL) {
@@ -66,6 +68,12 @@ Node* CMD()
     node = CMD2();
     if (node != NULL)
         return node;
+
+    current_token = save;
+    node = CMD3();
+    if (node != NULL)
+        return node;
+
     current_token = save;
     return SIMPLECMD();
 }
@@ -80,7 +88,7 @@ Node* CMD1()
     deleteNode(simplecmdNode);
     return NULL;
   }
-  
+
   char* filename;
   if (!term(TT_TOKEN, &filename)) {
     free(filename);
@@ -93,16 +101,15 @@ Node* CMD1()
 
 Node* CMD2()
 {
-    Node* simplecmdNode;
-
-    if ((simplecmdNode = SIMPLECMD()) == NULL)
-        return NULL;
+  Node* simplecmdNode;
+  if ((simplecmdNode = SIMPLECMD()) == NULL)
+    return NULL;
 
   if (!term(TT_GREATER, NULL)) {
     deleteNode(simplecmdNode);
     return NULL;
   }
-  
+
   char* filename;
   if (!term(TT_TOKEN, &filename)) {
     free(filename);
@@ -111,6 +118,27 @@ Node* CMD2()
   }
 
   return createNodeRedirectOut(filename, simplecmdNode);
+}
+
+Node* CMD3()
+{
+  Node* simplecmdNode;
+  if ((simplecmdNode = SIMPLECMD()) == NULL)
+    return NULL;
+
+  if (!term(TT_DOUBLE_GREATER, NULL)) {
+    deleteNode(simplecmdNode);
+    return NULL;
+  }
+
+  char* filename;
+  if (!term(TT_TOKEN, &filename)) {
+    free(filename);
+    deleteNode(simplecmdNode);
+    return NULL;
+  }
+
+  return createNodeRedirectOutAppend(filename, simplecmdNode);
 }
 
 Node* SIMPLECMD()
@@ -196,16 +224,16 @@ Node* parser_build_syntax_tree(token_t* token)
       return NULL;
     if (strlen(token->data) == 0)
       return NULL;
-  
+
     current_token = token;
 
     Node* syntax_tree = parse_tokens();
-  
+
     if (current_token != NULL && current_token->type != TT_TOKEN) {
         printf("Syntax Error near: %s\n", current_token->data);
         return NULL;
     }
-  
+
   return syntax_tree;
 }
 

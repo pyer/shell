@@ -12,12 +12,12 @@ void strip_quotes(char* src, char* dest)
     strcpy(dest, src);
     return;
   }
-  
+
   int i;
-  
+
   char lastquote = 0;
   int j = 0;
-  
+
   for (i=0; i < n; i++)
   {
     char c = src[i];
@@ -28,7 +28,7 @@ void strip_quotes(char* src, char* dest)
     else
       dest[j++] = c;
   }
-  
+
   dest[j] = 0;
 }
 
@@ -76,19 +76,19 @@ token_t* lexer_build(char* input, int size)
   if (size == 0) {
     return NULL;
   }
-  
+
   // allocate the first token
   token_t* first_token = create_first_token(size);
   token_t* token = first_token;
- 
+
   int i = 0;
   int j = 0;
   char c;
   int state = STATE_GENERAL;
-  
+
   do {
-    c = input[i];    
-    
+    c = input[i];
+
     if (state == STATE_GENERAL) {
       switch (c) {
         case '\'':
@@ -117,7 +117,7 @@ token_t* lexer_build(char* input, int size)
             j = 0;
           }
           break;
-          
+
         case '>':
           if (j > 0) {
             token->data[j] = 0;
@@ -128,6 +128,13 @@ token_t* lexer_build(char* input, int size)
           token->data[0] = c;
           token->data[1] = 0;
           token->type = TT_GREATER;
+          // check if ">>"
+          if (input[i+1] == c) {
+            token->data[1] = c;
+            token->data[2] = 0;
+            i++;
+            token->type = TT_DOUBLE_GREATER;
+          }
           token = create_next_token(token, size - i);
           break;
 
@@ -162,44 +169,42 @@ token_t* lexer_build(char* input, int size)
           token->type = TT_TOKEN;
           break;
       }
-    }
-    else if (state == STATE_IN_DQUOTE) {
+    } else if (state == STATE_IN_DQUOTE) {
       token->data[j++] = c;
       if (c == '\"')
         state = STATE_GENERAL;
-      
-    }
-    else if (state == STATE_IN_QUOTE) {
+
+    } else if (state == STATE_IN_QUOTE) {
       token->data[j++] = c;
       if (c == '\'')
         state = STATE_GENERAL;
     }
-    
+
     if (c == '\0') {
 //      if (j > 0) {
         token->data[j] = 0;
         j = 0;
 //      }
     }
-    
+
     i++;
   } while (c != '\0');
-  
+
   while (token != NULL) {
     if (token->type == TT_TOKEN) {
       glob_t globbuf;
       glob(token->data, GLOB_TILDE, NULL, &globbuf);
-      
+
       if (globbuf.gl_pathc > 0)
       {
         // save the next token so we can attach it later
         token_t* saved = token->next;
-        
+
         // replace the current token with the first one
         free(token->data);
         token->data = malloc(strlen(globbuf.gl_pathv[0]) + 1);
         strcpy(token->data, globbuf.gl_pathv[0]);
-                
+
         int i;
         for (i = 1; i < globbuf.gl_pathc; i++) {
           token = create_token(globbuf.gl_pathv[i]);
@@ -214,7 +219,7 @@ token_t* lexer_build(char* input, int size)
         token->data = stripped;
       }
     }
-    
+
     token = token->next;
   }
 

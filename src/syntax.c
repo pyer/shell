@@ -39,6 +39,17 @@ Node* createNodeRedirectOut(char* data, Node* rightNode)
   return node;
 }
 
+Node* createNodeRedirectOutAppend(char* data, Node* rightNode)
+{
+  Node* node = malloc(sizeof(*node));
+  assert(node != NULL);
+  node->type  = NODE_REDIRECT_OUT_APPEND;
+  node->left  = NULL;
+  node->right = rightNode;
+  node->szData = data;
+  return node;
+}
+
 Node* createNodeArgument(char *argument, Node* tokenListNode)
 {
   Node* node = malloc(sizeof(*node));
