@@ -21,7 +21,7 @@ void interpret_line(char* linebuffer, size_t len) {
 //  lexer_show(first_token);
   // parse the tokens into an abstract syntax tree
   root = parser_build_syntax_tree(first_token);
-  parser_show_syntax_tree(root);
+//  parser_show_syntax_tree(root);
   if (root != NULL) {
       // interpret the syntax tree
       execute_syntax_tree(root);
