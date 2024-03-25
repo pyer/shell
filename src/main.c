@@ -31,7 +31,7 @@ void interpret_line(char* linebuffer, size_t len) {
   lexer_destroy(first_token);
 }
 
-bool getkeyboard(char **buffer, size_t *n, FILE *tty)
+bool getkeyboard(char **buffer, size_t *n)
 {
   bool again = true;
   ssize_t nread = 0;
@@ -39,8 +39,8 @@ bool getkeyboard(char **buffer, size_t *n, FILE *tty)
   while (again) {
     again = false;
     // Print the prompt
-    printf(prompt);
-    nread = getline(buffer, n, tty);
+    fputs(prompt, stdout);
+    nread = getline(buffer, n, stdin);
     if (nread <= 0 && errno == EINTR) {
         again = true;     // signal interruption, read again
         clearerr(stdin);  // clear the error
@@ -64,7 +64,7 @@ int main()
 
   if (isatty(STDIN_FILENO)) {
     // Read the keyboard
-    while (getkeyboard(&linebuffer, &len, stdin)) {
+    while (getkeyboard(&linebuffer, &len)) {
       // user pressed ctrl-D aka EOF
       if (feof(stdin)) {
         puts("EOF");
