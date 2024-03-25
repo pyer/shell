@@ -18,7 +18,7 @@ void free_memory(int argc, char** argv)
 
 /* Builtin commands
  */
-void chdir(int argc, char** argv)
+void change_dir(int argc, char** argv)
 {
     if (argc == 1) {
 		    struct passwd *pw = getpwuid(getuid());
@@ -34,14 +34,13 @@ void chdir(int argc, char** argv)
 }
 
 
-
 /* Builtins
  */
 bool builtin_command(int argc, char** argv)
 {
     char* command = argv[0];
     if (strcmp(command, "cd") == 0) {
-      chdir(argc, argv);
+      change_dir(argc, argv);
     } else if(strcmp(command, "bye") == 0) {
       free_memory(argc, argv);
 		  exit(0);

@@ -20,7 +20,7 @@ syntax.o: src/syntax.c src/syntax.h
 execute.o: src/execute.c src/execute.h src/syntax.h src/builtins.h src/signals.h
 	$(CC) $(CFLAGS) -c src/execute.c
 
-builtins.o: src/builtins.h
+builtins.o: src/builtins.c src/builtins.h
 	$(CC) $(CFLAGS) -c src/builtins.c
 
 signals.o: src/signals.c src/signals.h
