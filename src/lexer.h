@@ -3,11 +3,11 @@
 
 // Token type
 enum {
-  TT_TOKEN  = '$',
+  TT_DEFAULT = '$',
+  TT_PIPE    = '|',
+  TT_LESSER  = '<',
   TT_GREATER = '>',
   TT_DOUBLE_GREATER = 0x3E3E, // '>',
-  TT_LESSER = '<',
-  TT_PIPE = '|',
 };
 
 // String delimiter

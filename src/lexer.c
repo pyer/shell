@@ -35,7 +35,7 @@ void strip_quotes(char* src, char* dest)
 token_t* create_first_token(int size)
 {
   token_t* tok = malloc(sizeof(token_t));
-  tok->type = TT_TOKEN;
+  tok->type = TT_DEFAULT;
   tok->data = malloc(size + 1); // 1 for null terminator
   tok->data[0] = 0;
   tok->next = NULL;
@@ -46,7 +46,7 @@ token_t* create_next_token(token_t* tok, int size)
 {
   tok->next = malloc(sizeof(token_t));
   tok = tok->next;
-  tok->type = TT_TOKEN;
+  tok->type = TT_DEFAULT;
   tok->data = malloc(size + 1); // 1 for null terminator
   tok->data[0] = 0;
   tok->next = NULL;
@@ -56,7 +56,7 @@ token_t* create_next_token(token_t* tok, int size)
 token_t* create_token(char* data)
 {
   token_t* tok = malloc(sizeof(token_t));
-  tok->type = TT_TOKEN;
+  tok->type = TT_DEFAULT;
   tok->data = malloc(strlen(data) + 1); // 1 for null terminator
   strcpy(tok->data, data);
   tok->next = NULL;
@@ -94,16 +94,16 @@ token_t* lexer_build(char* input, int size)
         case '\'':
           state = STATE_IN_QUOTE;
           token->data[j++] = c;
-          token->type = TT_TOKEN;
+          token->type = TT_DEFAULT;
           break;
         case '\"':
           state = STATE_IN_DQUOTE;
           token->data[j++] = c;
-          token->type = TT_TOKEN;
+          token->type = TT_DEFAULT;
           break;
         case '\\':
           token->data[j++] = input[++i];
-          token->type = TT_TOKEN;
+          token->type = TT_DEFAULT;
           break;
         case '\n':
         case '\r':
@@ -166,7 +166,7 @@ token_t* lexer_build(char* input, int size)
 
         default:
           token->data[j++] = c;
-          token->type = TT_TOKEN;
+          token->type = TT_DEFAULT;
           break;
       }
     } else if (state == STATE_IN_DQUOTE) {
@@ -191,7 +191,7 @@ token_t* lexer_build(char* input, int size)
   } while (c != '\0');
 
   while (token != NULL) {
-    if (token->type == TT_TOKEN) {
+    if (token->type == TT_DEFAULT) {
       glob_t globbuf;
       glob(token->data, GLOB_TILDE, NULL, &globbuf);
 
@@ -233,6 +233,7 @@ void lexer_destroy(token_t* ptr)
 }
 
 /* For debugging */
+/*
 void lexer_show(token_t* ptr)
 {
   while (ptr != NULL) {
@@ -240,4 +241,5 @@ void lexer_show(token_t* ptr)
     ptr = ptr->next;
   }
 }
+*/
 
