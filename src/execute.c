@@ -7,8 +7,8 @@
 #include <sys/wait.h>
 
 #include "builtins.h"
+#include "node.h"
 #include "signals.h"
-#include "syntax.h"
 
 void execute_simple_command(Node* simple_cmd_node,
                              bool stdin_pipe,

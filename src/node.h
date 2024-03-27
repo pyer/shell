@@ -1,5 +1,5 @@
-#ifndef SYNTAX_H
-#define SYNTAX_H
+#ifndef NODE_H
+#define NODE_H
 
 enum {
     NODE_PIPE,

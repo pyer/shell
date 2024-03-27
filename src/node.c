@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "syntax.h"
+#include "node.h"
 
 /* Syntax tree management */
 
