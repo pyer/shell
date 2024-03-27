@@ -75,9 +75,9 @@ Node* createNodeCommand(char *command, Node* tokenListNode)
 void deleteNode(Node* node)
 {
   if (node != NULL) {
-    if (node->szData != NULL) {
-      free(node->szData);
-    }
+//    if (node->szData != NULL) {
+//      free(node->szData);
+//    }
     deleteNode(node->left);
     deleteNode(node->right);
     free(node);
