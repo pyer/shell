@@ -6,6 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <version.h>
+
 /* Manage memory
  */
 void free_memory(int argc, char** argv)
@@ -41,6 +43,8 @@ bool builtin_command(int argc, char** argv)
     char* command = argv[0];
     if (strcmp(command, "cd") == 0) {
       change_dir(argc, argv);
+    } else if(strcmp(command, "version") == 0) {
+      printf("Version %s (%s %s)\n", VERSION, __DATE__, __TIME__);
     } else if(strcmp(command, "bye") == 0) {
       free_memory(argc, argv);
 		  exit(0);
