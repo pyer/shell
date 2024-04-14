@@ -38,19 +38,24 @@ void change_dir(int argc, char** argv)
 
 /* Builtins
  */
-bool builtin_command(int argc, char** argv)
+bool builtin_command(int argc, char** argv, int status)
 {
     char* command = argv[0];
-    if (strcmp(command, "cd") == 0) {
+    if (strcmp(command, "?") == 0) {
+      printf("%d\n", status);
+    } else if (strcmp(command, "cd") == 0) {
       change_dir(argc, argv);
-    } else if(strcmp(command, "version") == 0) {
+    } else if (strcmp(command, "version") == 0) {
       printf("Version %s (%s %s)\n", VERSION, __DATE__, __TIME__);
-    } else if(strcmp(command, "bye") == 0) {
+    } else if (strcmp(command, "bye") == 0) {
       free_memory(argc, argv);
 		  exit(0);
-	  } else if(strcmp(command, "exit") == 0) {
+	  } else if (strcmp(command, "exit") == 0) {
+      if (argc > 1) {
+        status = atoi(argv[1]);
+      }
       free_memory(argc, argv);
-		  exit(0);
+		  exit(status);
 	  } else {
       return false;
     }

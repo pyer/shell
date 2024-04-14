@@ -10,6 +10,9 @@
 #include "node.h"
 #include "signals.h"
 
+/* code returned by the execvp process or builtin command */
+int status = 0;
+
 void execute_simple_command(Node* simple_cmd_node,
                              bool stdin_pipe,
                              bool stdout_pipe,
@@ -49,7 +52,8 @@ void execute_simple_command(Node* simple_cmd_node,
     argc = i;
 
     // check for built-in commands
-    if (builtin_command(argc, argv)) {
+    if (builtin_command(argc, argv, status)) {
+      status = 0;
       free_memory(argc, argv);
       return;
     }
@@ -101,7 +105,12 @@ void execute_simple_command(Node* simple_cmd_node,
         perror("fork");
     } else {
         // wait till the process has not finished
-        while (waitpid(pid, NULL, 0) <= 0);
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) {
+          status = WEXITSTATUS(status);
+        } else {
+          status = 0;
+        }
     }
     // Free allocated memory
     free_memory(argc, argv);
