@@ -13,6 +13,11 @@
 /* code returned by the execvp process or builtin command */
 int status = 0;
 
+int last_status()
+{
+  return status;
+}
+
 void execute_simple_command(Node* simple_cmd_node,
                              bool stdin_pipe,
                              bool stdout_pipe,
@@ -53,7 +58,6 @@ void execute_simple_command(Node* simple_cmd_node,
 
     // check for built-in commands
     if (builtin_command(argc, argv, status)) {
-      status = 0;
       free_memory(argc, argv);
       return;
     }

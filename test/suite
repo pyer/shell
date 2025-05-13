@@ -1,0 +1,19 @@
+#!/bin/bash
+cd test
+echo -n "test_pipe "
+../shell <test_pipe >/tmp/result
+diff /tmp/result file_abc && echo OK
+
+echo -n "test_redirect 1 "
+../shell <test_redirect1
+diff /tmp/result file_abc && echo OK
+
+echo -n "test_redirect 2 "
+../shell <test_redirect2
+diff /tmp/result file_abc && echo OK
+
+echo -n "test_redirect 3 "
+../shell <test_redirect3
+diff /tmp/result file_abc && echo OK
+
+

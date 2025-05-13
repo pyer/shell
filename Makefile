@@ -1,3 +1,4 @@
+
 CC = gcc
 CFLAGS = -m64 -I./src
 
@@ -25,6 +26,17 @@ builtins.o: src/builtins.c src/builtins.h src/version.h
 
 signals.o: src/signals.c src/signals.h
 	$(CC) $(CFLAGS) -c src/signals.c
+
+test: all-tests
+
+all-tests:
+	@test/status
+	@test/error
+	@echo -e "Test error "
+	@./shell <test/error  || echo OK
+	@echo -e "Test status "
+	@./shell <test/status && echo OK
+#	@./shell <test/pipe   && echo OK
 
 clean:
 	rm -f *.o

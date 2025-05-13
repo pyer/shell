@@ -1,0 +1,5 @@
+echo b >/tmp/data
+echo c >/tmp/data
+echo a >/tmp/data
+cat /tmp/data | sort >/tmp/result
+diff /tmp/data /tmp/result

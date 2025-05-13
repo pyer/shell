@@ -79,5 +79,6 @@ int main()
     }
   }
   free(linebuffer);
+  return(last_status());
 }
 
