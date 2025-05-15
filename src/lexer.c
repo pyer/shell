@@ -249,9 +249,9 @@ void lexer_show(token_t* ptr)
 {
   printf("LEXER:\n");
   while (ptr != NULL) {
-    printf("%c : %zu --> %zu '%s'\n", ptr->type, ptr, ptr->next, ptr->data);
+    printf("Token %c : %zu --> %zu '%s'\n", ptr->type, ptr, ptr->next, ptr->data);
     ptr = ptr->next;
   }
+  printf("\n");
 }
-
 

@@ -11,7 +11,7 @@
 #include "signals.h"
 
 char *prompt = "> ";
-int debug =0;
+int debug = 0;
 
 void interpret_line(char* linebuffer, size_t len) {
   token_t *first_token = NULL;

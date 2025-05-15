@@ -217,7 +217,8 @@ void execute_variable(Node* t)
     Node *n=t->next;
     char *val=nt->right->szData;
     */
-    printf("VARIABLE: %s=%s\n", t->szData, t->right->szData);
+    //printf("VARIABLE: %s\n", t->szData);
+    printf("VARIABLE %d : %zu --> left=%zu right=%zu data='%s=%s'\n", t->type, t, t->left, t->right, t->szData, t->right->szData);
 }
 
 void execute_syntax_tree(Node* t)
