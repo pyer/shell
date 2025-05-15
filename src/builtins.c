@@ -42,7 +42,7 @@ bool builtin_command(int argc, char** argv, int status)
 {
     char* command = argv[0];
     if (strcmp(command, "?") == 0) {
-      printf("%d\n", status);
+      printf(" %s\n", (status == 0) ? "OK" : "Error");
     } else if (strcmp(command, "cd") == 0) {
       change_dir(argc, argv);
     } else if (strcmp(command, "version") == 0) {

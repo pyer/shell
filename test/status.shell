@@ -1,3 +1,0 @@
-echo a >/tmp/data
-echo a >/tmp/result
-diff /tmp/data /tmp/result

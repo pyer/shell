@@ -164,6 +164,19 @@ token_t* lexer_build(char* input, int size)
           token = create_next_token(token, size - i);
           break;
 
+        case '=':
+          if (j > 0) {
+            token->data[j] = 0;
+            token = create_next_token(token, size - i);
+            j = 0;
+          }
+          // next token
+          token->data[0] = c;
+          token->data[1] = 0;
+          token->type = TT_EQUAL;
+          token = create_next_token(token, size - i);
+          break;
+
         default:
           token->data[j++] = c;
           token->type = TT_DEFAULT;
@@ -181,10 +194,8 @@ token_t* lexer_build(char* input, int size)
     }
 
     if (c == '\0') {
-//      if (j > 0) {
         token->data[j] = 0;
         j = 0;
-//      }
     }
 
     i++;
@@ -233,13 +244,14 @@ void lexer_destroy(token_t* ptr)
 }
 
 /* For debugging */
-/*
+
 void lexer_show(token_t* ptr)
 {
+  printf("LEXER:\n");
   while (ptr != NULL) {
     printf("%c : %zu --> %zu '%s'\n", ptr->type, ptr, ptr->next, ptr->data);
     ptr = ptr->next;
   }
 }
-*/
+
 

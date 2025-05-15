@@ -18,6 +18,8 @@ int last_status()
   return status;
 }
 
+char ** variables = NULL;
+
 void execute_simple_command(Node* simple_cmd_node,
                              bool stdin_pipe,
                              bool stdout_pipe,
@@ -207,10 +209,23 @@ void execute_pipeline(Node* t)
     close(piperead);
 }
 
+void execute_variable(Node* t)
+{
+/*
+//    printf("VARIABLE: %d=%d\n", t->left, t->right);
+    char *var=t->right->szData;
+    Node *n=t->next;
+    char *val=nt->right->szData;
+    */
+    printf("VARIABLE: %s=%s\n", t->szData, t->right->szData);
+}
+
 void execute_syntax_tree(Node* t)
 {
     if (t->type == NODE_PIPE) {
         execute_pipeline(t);
+    } else if (t->type == NODE_VARIABLE) {
+        execute_variable(t);
     } else {
         execute_command(t, false, false, 0, 0);
     }

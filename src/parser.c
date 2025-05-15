@@ -9,6 +9,7 @@
  *
   <command line>    ::= <command> '|' <command line>
                       | <command>
+                      | <variable> '=' <value>
 
   <command>         ::= <simple command> '<' <filename>
                       | <simple command> '>' <filename>
@@ -17,10 +18,11 @@
 
   <simple command>  ::= <pathname> <token list>
 
+  <variable>        ::> <token>
   <token list>      ::= <token> <token list>
                       | (EMPTY)
 
-  <token> ::= (ANY CHARACTER EXCEPT SPACE, NEWLINE, '|', '<', '>')
+  <token> ::= (ANY CHARACTER EXCEPT SPACE, NEWLINE, '|', '<', '>', '=')
  *
  *
 **/
@@ -83,6 +85,19 @@ Node* CMD()
     token_t* save = current_token;
     Node* node = SIMPLECMD();
     if (node != NULL) {
+      if (type_is(TT_EQUAL)) {
+        if (default_token()) {
+          char* varname = current_token->data;
+          current_token = current_token->next;
+          return createNodeVariable(varname, node);
+        }
+      }
+      deleteNode(node);
+    }
+
+    current_token = save;
+    node = SIMPLECMD();
+    if (node != NULL) {
       if (type_is(TT_LESSER)) {
         if (default_token()) {
           char* filename = current_token->data;
@@ -123,27 +138,32 @@ Node* CMD()
     return SIMPLECMD();
 }
 
+bool type_is(int token_type)
+{
+  if (current_token == NULL)
+    return false;
+
+  bool ret = (current_token->type == token_type);
+  current_token = current_token->next;
+  return ret;
+}
+
+/*
 Node* parse_tokens()
 {
-    token_t* save = current_token;
-
     Node* cmdNode = CMD();
-    if (cmdNode != NULL) {
-      if (type_is(TT_PIPE)) {
+
+
+    if (type_is(TT_PIPE)) {
         // recursive parsing
         Node* jobNode = parse_tokens();
         if (jobNode != NULL) {
           return createNodePipe(cmdNode, jobNode);
         }
-      }
-      deleteNode(cmdNode);
     }
-
-    current_token = save;
-    cmdNode = CMD();
     return cmdNode;
 }
-
+*/
 Node* parser_build_syntax_tree(token_t* token)
 {
     if (token == NULL)
@@ -152,24 +172,22 @@ Node* parser_build_syntax_tree(token_t* token)
       return NULL;
 
     current_token = token;
-
     Node* syntax_tree = parse_tokens();
 
     if (current_token != NULL && current_token->type != TT_DEFAULT) {
         printf("Syntax Error near: %s\n", current_token->data);
         return NULL;
     }
-
-  return syntax_tree;
+    return syntax_tree;
 }
-/*
+
 void parser_show_syntax_tree(Node* ptr)
 {
   if (ptr != NULL) {
+    printf("PARSER:\n");
     printf("%d : %zu --> left=%zu right=%zu data='%s'\n", ptr->type, ptr, ptr->left, ptr->right, ptr->szData);
     parser_show_syntax_tree(ptr->left);
     parser_show_syntax_tree(ptr->right);
   }
-
 }
-*/
+
