@@ -11,6 +11,7 @@
 #include "signals.h"
 
 char *prompt = "> ";
+int debug =0;
 
 void interpret_line(char* linebuffer, size_t len) {
   token_t *first_token = NULL;
@@ -18,10 +19,12 @@ void interpret_line(char* linebuffer, size_t len) {
 
   // lexically analyze and build a list of tokens
   first_token = lexer_build(linebuffer, len);
-  lexer_show(first_token);
+  if (debug)
+      lexer_show(first_token);
   // parse the tokens into an abstract syntax tree
   root = parser_build_syntax_tree(first_token);
-  parser_show_syntax_tree(root);
+  if (debug)
+      parser_show_syntax_tree(root);
   if (root != NULL) {
       // interpret the syntax tree
       execute_syntax_tree(root);

@@ -138,6 +138,7 @@ Node* CMD()
     return SIMPLECMD();
 }
 
+/*
 bool type_is(int token_type)
 {
   if (current_token == NULL)
@@ -147,8 +148,8 @@ bool type_is(int token_type)
   current_token = current_token->next;
   return ret;
 }
+*/
 
-/*
 Node* parse_tokens()
 {
     Node* cmdNode = CMD();
@@ -163,7 +164,7 @@ Node* parse_tokens()
     }
     return cmdNode;
 }
-*/
+
 Node* parser_build_syntax_tree(token_t* token)
 {
     if (token == NULL)
