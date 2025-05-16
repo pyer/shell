@@ -8,6 +8,7 @@ enum {
   STATE_GENERAL,
   STATE_IN_DQUOTE,
   STATE_IN_QUOTE,
+  STATE_IN_EQUAL,
 };
 
 token_t* lexer_build(char* input, int size);

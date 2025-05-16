@@ -71,13 +71,13 @@ Node* createNodeCommand(char *command, Node* tokenListNode)
   return node;
 }
 
-Node* createNodeVariable(char *variable, Node* tokenListNode)
+Node* createNodeVariable(char *variable, Node* value)
 {
   Node* node = malloc(sizeof(*node));
   assert(node != NULL);
   node->type  = NODE_VARIABLE;
   node->left  = NULL;
-  node->right = tokenListNode;
+  node->right = value;
   node->szData = variable;
   return node;
 }

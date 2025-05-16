@@ -118,6 +118,14 @@ token_t* lexer_build(char* input, int size)
           }
           break;
 
+        case '=':
+          state = STATE_IN_EQUAL;
+          token->type = TT_EQUAL;
+          token->data[j] = 0;
+          token = create_next_token(token, size - i);
+          j = 0;
+          break;
+
         case '>':
           if (j > 0) {
             token->data[j] = 0;
@@ -164,23 +172,16 @@ token_t* lexer_build(char* input, int size)
           token = create_next_token(token, size - i);
           break;
 
-        case '=':
-          if (j > 0) {
-            token->data[j] = 0;
-            token = create_next_token(token, size - i);
-            j = 0;
-          }
-          // next token
-          token->data[0] = c;
-          token->data[1] = 0;
-          token->type = TT_EQUAL;
-          token = create_next_token(token, size - i);
-          break;
-
         default:
           token->data[j++] = c;
           token->type = TT_DEFAULT;
           break;
+      }
+    } else if (state == STATE_IN_EQUAL) {
+      if (c<' ') {
+        state = STATE_GENERAL;
+      } else {
+        token->data[j++] = c;
       }
     } else if (state == STATE_IN_DQUOTE) {
       token->data[j++] = c;

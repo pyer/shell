@@ -211,6 +211,7 @@ void execute_pipeline(Node* t)
 
 void execute_variable(Node* t)
 {
+    char *value;
 /*
 //    printf("VARIABLE: %d=%d\n", t->left, t->right);
     char *var=t->right->szData;

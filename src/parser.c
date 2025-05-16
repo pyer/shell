@@ -7,8 +7,8 @@
 
 /*** Shell grammar ***
  *
-  <command line>    ::= <command> '|' <command line>
-                      | <command>
+  <text>            ::= <command>
+                      | <command>  '|' <text>
                       | <variable> '=' <value>
 
   <command>         ::= <simple command> '<' <filename>
@@ -16,38 +16,33 @@
                       | <simple command> ">>" <filename>
                       | <simple command>
 
+  <variable>        ::= <token list>
+
   <simple command>  ::= <pathname> <token list>
 
-  <variable>        ::> <token>
   <token list>      ::= <token> <token list>
                       | (EMPTY)
 
-  <token> ::= (ANY CHARACTER EXCEPT SPACE, NEWLINE, '|', '<', '>', '=')
+  <token> ::= (ANY CHARACTER EXCEPT SPACE, NEWLINE, '|', '=', '<', '>')
  *
  *
 **/
 
-// current_token token pointer
 token_t* current_token = NULL;
 
-bool type_is(int token_type)
+bool token_type_is(int token_type)
 {
   if (current_token == NULL)
     return false;
 
-  bool ret = (current_token->type == token_type);
-  current_token = current_token->next;
-  return ret;
-}
-
-bool default_token()
-{
-  if (current_token == NULL)
-    return false;
-  if (current_token->type == TT_DEFAULT) {
-    return true;
+  if (current_token->type == token_type) {
+      current_token = current_token->next;
+      if (current_token == NULL)
+          return false;
+      if (current_token->type == TT_DEFAULT) {
+          return true;
+      }
   }
-  current_token = current_token->next;
   return false;
 }
 
@@ -76,34 +71,30 @@ Node* SIMPLECMD()
     token_t* save = current_token;
     if (current_token == NULL)
         return NULL;
+    printf("SIMPLECMD %c : %zu --> %zu '%s'\n", current_token->type, current_token, current_token->next, current_token->data);
     if (current_token->type == TT_DEFAULT) {
         current_token = current_token->next;
         // we don't check whether TOKENLIST is NULL since its a valid grammer
         return createNodeCommand(save->data, TOKENLIST());
     }
+    if (current_token->type == TT_EQUAL) {
+        current_token = current_token->next;
+        printf("Token= %c : %zu --> %zu '%s'\n", current_token->type, current_token, current_token->next, current_token->data);
+          return createNodeVariable(save->data, createNodeArgument(current_token->data,NULL));
+    }
     current_token = current_token->next;
     return NULL;
 }
-
-/*
-  if (current_token == NULL)
-    return false;
-  if (current_token->type == TT_DEFAULT) {
-    return true;
-  }
-  current_token = current_token->next;
-  return false;
-*/
 
 Node* CMD()
 {
     token_t* save = current_token;
     Node* node = SIMPLECMD();
     if (node != NULL) {
-      if (type_is(TT_EQUAL)) {
-        if (default_token()) {
-          return createNodeVariable(save->data, TOKENLIST());
-        }
+      if (token_type_is(TT_EQUAL)) {
+        Node *ptr = node;
+    printf("NODE= %d : %zu --> left=%zu right=%zu data='%s'\n", ptr->type, ptr, ptr->left, ptr->right, ptr->szData);
+          return createNodeVariable(save->data, node);
       }
       deleteNode(node);
     }
@@ -111,12 +102,10 @@ Node* CMD()
     current_token = save;
     node = SIMPLECMD();
     if (node != NULL) {
-      if (type_is(TT_LESSER)) {
-        if (default_token()) {
+      if (token_type_is(TT_LESSER)) {
           char* filename = current_token->data;
           current_token  = current_token->next;
           return createNodeRedirectIn(filename, node);
-        }
       }
       deleteNode(node);
     }
@@ -124,12 +113,10 @@ Node* CMD()
     current_token = save;
     node = SIMPLECMD();
     if (node != NULL) {
-      if (type_is(TT_GREATER)) {
-        if (default_token()) {
+      if (token_type_is(TT_GREATER)) {
           char* filename = current_token->data;
           current_token  = current_token->next;
           return createNodeRedirectOut(filename, node);
-        }
       }
       deleteNode(node);
     }
@@ -137,12 +124,10 @@ Node* CMD()
     current_token = save;
     node = SIMPLECMD();
     if (node != NULL) {
-      if (type_is(TT_DOUBLE_GREATER)) {
-        if (default_token()) {
+      if (token_type_is(TT_DOUBLE_GREATER)) {
           char* filename = current_token->data;
           current_token  = current_token->next;
           return createNodeRedirectOutAppend(filename, node);
-        }
       }
       deleteNode(node);
     }
