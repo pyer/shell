@@ -73,7 +73,7 @@ int main()
   char* linebuffer = NULL;
   size_t  len = 0;
   // ignore Ctrl-\ Ctrl-C Ctrl-Z signals
-//  ignore_signals();
+  ignore_signals();
 
   if (isatty(STDIN_FILENO)) {
     // Read the keyboard
