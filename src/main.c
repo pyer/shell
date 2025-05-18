@@ -15,13 +15,13 @@
 char *prompt = "> ";
 
 void interpret_line(char* linebuffer, size_t len) {
-  token_t* first_token = NULL;
+  Token* first_token = NULL;
   Node* root = NULL;
 
   // lexically analyze and build a list of tokens
   first_token = lexer(linebuffer, len);
   #ifdef DEBUG
-    token_t* ptr = first_token;
+    Token* ptr = first_token;
     while (ptr != NULL) {
       printf("Token %c : %zu --> %zu '%s'\n", ptr->type, ptr, ptr->next, ptr->data);
       ptr = ptr->next;

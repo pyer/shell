@@ -28,7 +28,7 @@
  *
 **/
 
-token_t* current_token = NULL;
+Token* current_token = NULL;
 
 /*
  * Create the list of arguments from the list of tokens
@@ -76,7 +76,7 @@ Node* parse_tokens()
         default:
           // we don't check whether tokens_list is NULL since it's a valid grammer
 //    printf("SIMPLECMD enter %c : %zu --> %zu '%s'\n", current_token->type, current_token, current_token->next, current_token->data);
-          token_t *cmd = current_token;
+          Token *cmd = current_token;
           node = createNodeCommand(cmd->data, tokens_list());
           //node = createNodeCommand(current_token->data, tokens_list());
 //    printf("SIMPLECMD exit %zu\n", node);
@@ -86,7 +86,7 @@ Node* parse_tokens()
     return node;
 }
 
-Node* parser_build_syntax_tree(token_t* token)
+Node* parser_build_syntax_tree(Token* token)
 {
     if (token == NULL)
       return NULL;

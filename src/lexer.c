@@ -4,9 +4,9 @@
 
 #include "lexer.h"
 
-token_t* create_first_token(int size)
+Token* create_first_token(int size)
 {
-  token_t* tok = malloc(sizeof(token_t));
+  Token* tok = malloc(sizeof(Token));
   tok->type = TT_DEFAULT;
   tok->data = malloc(size + 1); // 1 for null terminator
   tok->data[0] = 0;
@@ -14,9 +14,9 @@ token_t* create_first_token(int size)
   return tok;
 }
 
-token_t* create_next_token(token_t* tok, int size)
+Token* create_next_token(Token* tok, int size)
 {
-  tok->next = malloc(sizeof(token_t));
+  tok->next = malloc(sizeof(Token));
   tok = tok->next;
   tok->type = TT_DEFAULT;
   tok->data = malloc(size + 1); // 1 for null terminator
@@ -25,9 +25,9 @@ token_t* create_next_token(token_t* tok, int size)
   return tok;
 }
 
-token_t* create_token(char* data)
+Token* create_token(char* data)
 {
-  token_t* tok = malloc(sizeof(token_t));
+  Token* tok = malloc(sizeof(Token));
   tok->type = TT_DEFAULT;
   tok->data = malloc(strlen(data) + 1); // 1 for null terminator
   strcpy(tok->data, data);
@@ -35,7 +35,7 @@ token_t* create_token(char* data)
   return tok;
 }
 
-void delete_token(token_t* tok) {
+void delete_token(Token* tok) {
   if (tok != NULL) {
     free(tok->data);
     delete_token(tok->next);
@@ -43,15 +43,15 @@ void delete_token(token_t* tok) {
   }
 }
 
-token_t* lexer(char* input, int size)
+Token* lexer(char* input, int size)
 {
   if (size == 0) {
     return NULL;
   }
 
   // allocate the first token
-  token_t* first_token = create_first_token(size);
-  token_t* token = first_token;
+  Token* first_token = create_first_token(size);
+  Token* token = first_token;
 
   int i = 0;
   int j = 0;

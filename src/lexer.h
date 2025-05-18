@@ -10,6 +10,6 @@ enum {
   STATE_IN_EQUAL,
 };
 
-token_t* lexer(char* input, int size);
-void delete_token(token_t* ptr);
+Token* lexer(char* input, int size);
+void delete_token(Token* ptr);
 #endif
