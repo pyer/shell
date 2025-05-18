@@ -72,6 +72,11 @@ int main()
 {
   char* linebuffer = NULL;
   size_t  len = 0;
+  #ifdef DEBUG
+    char *check = malloc(4);
+    printf("Check memory %zu\n", check);
+    free(check);
+  #endif
   // ignore Ctrl-\ Ctrl-C Ctrl-Z signals
   ignore_signals();
 
@@ -92,6 +97,11 @@ int main()
     }
   }
   free(linebuffer);
+  #ifdef DEBUG
+    check = malloc(4);
+    printf("Check memory %zu\n", check);
+    free(check);
+  #endif
   return(last_status());
 }
 
