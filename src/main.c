@@ -15,13 +15,17 @@
 char *prompt = "> ";
 
 void interpret_line(char* linebuffer, size_t len) {
-  token_t *first_token = NULL;
+  token_t* first_token = NULL;
   Node* root = NULL;
 
   // lexically analyze and build a list of tokens
-  first_token = lexer_build(linebuffer, len);
+  first_token = lexer(linebuffer, len);
   #ifdef DEBUG
-    lexer_show(first_token);
+    token_t* ptr = first_token;
+    while (ptr != NULL) {
+      printf("Token %c : %zu --> %zu '%s'\n", ptr->type, ptr, ptr->next, ptr->data);
+      ptr = ptr->next;
+    }
   #endif
   // parse the tokens into an abstract syntax tree
   root = parser_build_syntax_tree(first_token);
@@ -37,7 +41,7 @@ void interpret_line(char* linebuffer, size_t len) {
       // free the structures
       deleteNode(root);
   }
-  lexer_destroy(first_token);
+  delete_token(first_token);
 }
 
 bool getkeyboard(char **buffer, size_t *n)

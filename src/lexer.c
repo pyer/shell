@@ -1,36 +1,8 @@
-#include <glob.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "lexer.h"
-
-void strip_quotes(char* src, char* dest)
-{
-  int n = strlen(src);
-  if (n <= 1) {
-    strcpy(dest, src);
-    return;
-  }
-
-  int i;
-
-  char lastquote = 0;
-  int j = 0;
-
-  for (i=0; i < n; i++)
-  {
-    char c = src[i];
-    if ((c == '\'' || c == '\"') && lastquote == 0)
-      lastquote = c;
-    else if (c == lastquote)
-      lastquote = 0;
-    else
-      dest[j++] = c;
-  }
-
-  dest[j] = 0;
-}
 
 token_t* create_first_token(int size)
 {
@@ -71,7 +43,7 @@ void delete_token(token_t* tok) {
   }
 }
 
-token_t* lexer_build(char* input, int size)
+token_t* lexer(char* input, int size)
 {
   if (size == 0) {
     return NULL;
@@ -189,64 +161,7 @@ token_t* lexer_build(char* input, int size)
 
   // terminate data of the last token 
   token->data[j] = 0;
-
-  token = first_token;
-  while (token != NULL) {
-    token_t* next = token->next;
-    if (next != NULL && next->data[0]=='\0') {
-      token->next = NULL;
-      free(next->data);
-      free(next);
-    }
-
-    if (token->type == TT_DEFAULT) {
-      glob_t globbuf;
-      glob(token->data, GLOB_TILDE, NULL, &globbuf);
-
-      if (globbuf.gl_pathc > 0)
-      {
-        // save the next token so we can attach it later
-        token_t* saved = token->next;
-
-        // replace the current token with the first one
-        free(token->data);
-        token->data = malloc(strlen(globbuf.gl_pathv[0]) + 1);
-        strcpy(token->data, globbuf.gl_pathv[0]);
-
-        int i;
-        for (i = 1; i < globbuf.gl_pathc; i++) {
-          token = create_token(globbuf.gl_pathv[i]);
-        }
-        token->next = saved;
-      } else {
-        // token from the user might be inside quotation to escape special characters
-        // hence strip the quotation symbol
-        char* stripped = malloc(strlen(token->data) + 1);
-        strip_quotes(token->data, stripped);
-        free(token->data);
-        token->data = stripped;
-      }
-    }
-
-    token = token->next;
-  }
-
+  // and return the first token
   return first_token;
-}
-
-void lexer_destroy(token_t* ptr)
-{
-  if (ptr != NULL)
-    delete_token(ptr);
-}
-
-/* For debugging */
-
-void lexer_show(token_t* ptr)
-{
-  while (ptr != NULL) {
-    printf("Token %c : %zu --> %zu '%s'\n", ptr->type, ptr, ptr->next, ptr->data);
-    ptr = ptr->next;
-  }
 }
 

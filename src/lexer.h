@@ -3,7 +3,6 @@
 
 #include "token.h"
 
-// String delimiter
 enum {
   STATE_GENERAL,
   STATE_IN_DQUOTE,
@@ -11,7 +10,6 @@ enum {
   STATE_IN_EQUAL,
 };
 
-token_t* lexer_build(char* input, int size);
-void lexer_destroy(token_t* ptr);
-void lexer_show(token_t* ptr);
+token_t* lexer(char* input, int size);
+void delete_token(token_t* ptr);
 #endif
