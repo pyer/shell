@@ -3,8 +3,6 @@
 
 #include "node.h"
 
-/* Syntax tree management */
-
 Node* createNodePipe(Node* leftNode, Node* rightNode)
 {
   Node* node = malloc(sizeof(*node));

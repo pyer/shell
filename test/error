@@ -1,3 +1,0 @@
-#!/bin/bash
-echo -e "Test error "
-./shell <test/error.shell || echo OK

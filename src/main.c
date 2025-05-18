@@ -10,7 +10,7 @@
 #include "execute.h"
 #include "signals.h"
 
-#define DEBUG
+//#define DEBUG
 
 char *prompt = "> ";
 
@@ -29,6 +29,9 @@ void interpret_line(char* linebuffer, size_t len) {
     parser_show_syntax_tree(root);
   #endif
   if (root != NULL) {
+  #ifdef DEBUG
+      printf("EXECUTE : left=%zu right=%zu data='%s'\n", root->left, root->right, root->szData);
+  #endif
       // interpret the syntax tree
       execute_syntax_tree(root);
       // free the structures
@@ -66,7 +69,7 @@ int main()
   char* linebuffer = NULL;
   size_t  len = 0;
   // ignore Ctrl-\ Ctrl-C Ctrl-Z signals
-  ignore_signals();
+//  ignore_signals();
 
   if (isatty(STDIN_FILENO)) {
     // Read the keyboard

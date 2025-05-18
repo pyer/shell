@@ -114,6 +114,7 @@ token_t* lexer_build(char* input, int size)
           if (j > 0) {
             token->data[j] = 0;
             token = create_next_token(token, size - i);
+            token->type = TT_DEFAULT;
             j = 0;
           }
           break;
@@ -130,33 +131,23 @@ token_t* lexer_build(char* input, int size)
           if (j > 0) {
             token->data[j] = 0;
             token = create_next_token(token, size - i);
-            j = 0;
           }
-          // next token
-          token->data[0] = c;
-          token->data[1] = 0;
           token->type = TT_GREATER;
           // check if ">>"
           if (input[i+1] == c) {
-            token->data[1] = c;
-            token->data[2] = 0;
             i++;
             token->type = TT_DOUBLE_GREATER;
           }
-          token = create_next_token(token, size - i);
+          j = 0;
           break;
 
         case '<':
           if (j > 0) {
             token->data[j] = 0;
             token = create_next_token(token, size - i);
-            j = 0;
           }
-          // next token
-          token->data[0] = c;
-          token->data[1] = 0;
           token->type = TT_LESSER;
-          token = create_next_token(token, size - i);
+          j = 0;
           break;
 
         case '|':
@@ -174,7 +165,6 @@ token_t* lexer_build(char* input, int size)
 
         default:
           token->data[j++] = c;
-          token->type = TT_DEFAULT;
           break;
       }
     } else if (state == STATE_IN_EQUAL) {
@@ -194,15 +184,21 @@ token_t* lexer_build(char* input, int size)
         state = STATE_GENERAL;
     }
 
-    if (c == '\0') {
-        token->data[j] = 0;
-        j = 0;
-    }
-
     i++;
   } while (c != '\0');
 
+  // terminate data of the last token 
+  token->data[j] = 0;
+
+  token = first_token;
   while (token != NULL) {
+    token_t* next = token->next;
+    if (next != NULL && next->data[0]=='\0') {
+      token->next = NULL;
+      free(next->data);
+      free(next);
+    }
+
     if (token->type == TT_DEFAULT) {
       glob_t globbuf;
       glob(token->data, GLOB_TILDE, NULL, &globbuf);
@@ -248,11 +244,9 @@ void lexer_destroy(token_t* ptr)
 
 void lexer_show(token_t* ptr)
 {
-  printf("LEXER:\n");
   while (ptr != NULL) {
     printf("Token %c : %zu --> %zu '%s'\n", ptr->type, ptr, ptr->next, ptr->data);
     ptr = ptr->next;
   }
-  printf("\n");
 }
 

@@ -1,0 +1,8 @@
+echo a  >/tmp/result
+echo b >>/tmp/result
+echo c >>/tmp/result
+cmp -s /tmp/result test/resources/file_abc
+?
+sort <test/resources/file_bca >/tmp/result
+cmp -s /tmp/result test/resources/file_abc
+?

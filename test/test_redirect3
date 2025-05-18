@@ -1,3 +1,0 @@
-echo a > /tmp/result
-echo b >>/tmp/result
-echo c >> /tmp/result

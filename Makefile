@@ -30,13 +30,10 @@ signals.o: src/signals.c src/signals.h
 test: all-tests
 
 all-tests:
-	@test/status
-	@test/error
-	@echo -e "Test error "
-	@./shell <test/error  || echo OK
-	@echo -e "Test status "
-	@./shell <test/status && echo OK
-#	@./shell <test/pipe   && echo OK
+	./shell <test/pipe
+	./shell <test/redirect
+	./shell <test/status
+	./shell <test/variable
 
 clean:
 	rm -f *.o

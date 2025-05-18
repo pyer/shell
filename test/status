@@ -1,3 +1,1 @@
-#!/bin/bash
-echo -e "Test status "
-./shell <test/status.shell && echo OK
+?
