@@ -31,7 +31,7 @@
  *
 **/
 
-Node* createNodePipe(Node* leftNode, Node* rightNode)
+Node* createPipe(Node* leftNode, Node* rightNode)
 {
   Node* node = malloc(sizeof(*node));
   assert(node != NULL);
@@ -42,69 +42,14 @@ Node* createNodePipe(Node* leftNode, Node* rightNode)
   return node;
 }
 
-Node* createNodeRedirectIn(char* data, Node* rightNode)
+Node* createNode(int type, char *data, Node* right)
 {
   Node* node = malloc(sizeof(*node));
   assert(node != NULL);
-  node->type  = NODE_REDIRECT_IN;
+  node->type  = type;
   node->left  = NULL;
-  node->right = rightNode;
+  node->right = right;
   node->szData = data;
-  return node;
-}
-
-Node* createNodeRedirectOut(char* data, Node* rightNode)
-{
-  Node* node = malloc(sizeof(*node));
-  assert(node != NULL);
-  node->type  = NODE_REDIRECT_OUT;
-  node->left  = NULL;
-  node->right = rightNode;
-  node->szData = data;
-  return node;
-}
-
-Node* createNodeRedirectOutAppend(char* data, Node* rightNode)
-{
-  Node* node = malloc(sizeof(*node));
-  assert(node != NULL);
-  node->type  = NODE_REDIRECT_OUT_APPEND;
-  node->left  = NULL;
-  node->right = rightNode;
-  node->szData = data;
-  return node;
-}
-
-Node* createNodeArgument(char *argument, Node* tokenListNode)
-{
-  Node* node = malloc(sizeof(*node));
-  assert(node != NULL);
-  node->type  = NODE_ARGUMENT;
-  node->left  = NULL;
-  node->right = tokenListNode;
-  node->szData = argument;
-  return node;
-}
-
-Node* createNodeCommand(char *command, Node* tokenListNode)
-{
-  Node* node = malloc(sizeof(*node));
-  assert(node != NULL);
-  node->type  = NODE_COMMAND;
-  node->left  = NULL;
-  node->right = tokenListNode;
-  node->szData = command;
-  return node;
-}
-
-Node* createNodeVariable(char *variable, Node* value)
-{
-  Node* node = malloc(sizeof(*node));
-  assert(node != NULL);
-  node->type  = NODE_VARIABLE;
-  node->left  = NULL;
-  node->right = value;
-  node->szData = variable;
   return node;
 }
 
@@ -131,7 +76,7 @@ Node* tokens_list()
     Node* node = NULL;
     current_token = current_token->next;
     while (current_token != NULL && current_token->type == TT_DEFAULT) {
-        node = createNodeArgument(current_token->data, node);
+        node = createNode(NODE_ARGUMENT, current_token->data, node);
         current_token = current_token->next;
     }
     return node;
@@ -151,28 +96,25 @@ Node* parse_tokens()
           // recursive parsing
           Node* jobNode = parse_tokens();
           if (jobNode != NULL) {
-            return createNodePipe(node, jobNode);
+            return createPipe(node, jobNode);
           }
           break;
         case TT_GREATER:
-          node = createNodeRedirectOut(current_token->data, node);
+          node = createNode(NODE_REDIRECT_OUT, current_token->data, node);
           current_token = current_token->next;
           break;
         case TT_DOUBLE_GREATER:
-          node = createNodeRedirectOutAppend(current_token->data, node);
+          node = createNode(NODE_REDIRECT_OUT_APPEND, current_token->data, node);
           current_token = current_token->next;
           break;
         case TT_LESSER:
-          node = createNodeRedirectIn(current_token->data, node);
+          node = createNode(NODE_REDIRECT_IN, current_token->data, node);
           current_token = current_token->next;
           break;
         default:
           // we don't check whether tokens_list is NULL since it's a valid grammer
-//    printf("SIMPLECMD enter %c : %zu --> %zu '%s'\n", current_token->type, current_token, current_token->next, current_token->data);
           Token *cmd = current_token;
-          node = createNodeCommand(cmd->data, tokens_list());
-          //node = createNodeCommand(current_token->data, tokens_list());
-//    printf("SIMPLECMD exit %zu\n", node);
+          node = createNode(NODE_COMMAND, cmd->data, tokens_list());
           break;
       }
     }
@@ -189,7 +131,7 @@ Node* parser_build_syntax_tree(Token* token)
     current_token = token;
     if (token->type == TT_EQUAL) {
         current_token = token->next;
-        return createNodeVariable(token->data, createNodeArgument(current_token->data, NULL));
+        return createNode(NODE_VARIABLE, token->data, createNode(NODE_ARGUMENT, current_token->data, NULL));
     }
 
     Node* syntax_tree = parse_tokens();
