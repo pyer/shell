@@ -16,11 +16,11 @@ enum {
   TT_PERCENT  = '%'
 };
 
-typedef struct token Token;
-struct token {
+typedef struct Token
+{
   int type;
   char* data;
-  Token* next;
-};
+  struct Token* next;
+} Token;
 
 #endif
