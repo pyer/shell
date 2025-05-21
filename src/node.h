@@ -17,16 +17,7 @@ typedef struct Node
     char* szData;
     struct Node* left;
     struct Node* right;
-
 } Node;
-
-Node* createNodePipe(Node* leftNode, Node* rightNode);
-Node* createNodeRedirectIn(char* data, Node* rightNode);
-Node* createNodeRedirectOut(char* data, Node* rightNode);
-Node* createNodeRedirectOutAppend(char* data, Node* rightNode);
-Node* createNodeArgument(char *argument, Node* tokenListNode);
-Node* createNodeCommand(char *command, Node* tokenListNode);
-Node* createNodeVariable(char *variable, Node* tokenListNode);
 
 void deleteNode(Node* node);
 

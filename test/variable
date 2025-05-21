@@ -1,2 +1,5 @@
 var=1
+var="a"
+var='b'
+s="lorem ipsum"
 ?

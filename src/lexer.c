@@ -65,16 +65,20 @@ Token* lexer(char* input, int size)
       switch (c) {
         case '\'':
           state = STATE_IN_QUOTE;
-          token->data[j++] = c;
+          //token->data[j++] = c;
           token->type = TT_DEFAULT;
           break;
         case '\"':
           state = STATE_IN_DQUOTE;
-          token->data[j++] = c;
+          //token->data[j++] = c;
           token->type = TT_DEFAULT;
           break;
         case '\\':
           token->data[j++] = input[++i];
+          token->type = TT_DEFAULT;
+          break;
+        case '$':
+          state = STATE_IN_DOLLAR;
           token->type = TT_DEFAULT;
           break;
         case '\n':
@@ -140,20 +144,32 @@ Token* lexer(char* input, int size)
           break;
       }
     } else if (state == STATE_IN_EQUAL) {
-      if (c<' ') {
-        state = STATE_GENERAL;
-      } else {
-        token->data[j++] = c;
+      switch (c) {
+        case '\'':
+          state = STATE_IN_QUOTE;
+          break;
+        case '\"':
+          state = STATE_IN_DQUOTE;
+          break;
+        default:
+//          token->data[j] = 0;
+//          printf("Syntax error: %s\n", token->data);
+//          return NULL;
+          state = STATE_GENERAL;
+          token->data[j++] = c;
+          break;
       }
     } else if (state == STATE_IN_DQUOTE) {
-      token->data[j++] = c;
       if (c == '\"')
         state = STATE_GENERAL;
+      else
+        token->data[j++] = c;
 
     } else if (state == STATE_IN_QUOTE) {
-      token->data[j++] = c;
       if (c == '\'')
         state = STATE_GENERAL;
+      else
+        token->data[j++] = c;
     }
 
     i++;

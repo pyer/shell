@@ -1,3 +1,5 @@
+
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,6 +11,7 @@
 #include "builtins.h"
 #include "node.h"
 #include "signals.h"
+#include "variable.h"
 
 /* code returned by the execvp process or builtin command */
 int status = 0;
@@ -17,8 +20,6 @@ int last_status()
 {
   return status;
 }
-
-char ** variables = NULL;
 
 void execute_simple_command(Node* simple_cmd_node,
                              bool stdin_pipe,
@@ -211,15 +212,18 @@ void execute_pipeline(Node* t)
 
 void execute_variable(Node* t)
 {
-    char *value;
-/*
-//    printf("VARIABLE: %d=%d\n", t->left, t->right);
-    char *var=t->right->szData;
-    Node *n=t->next;
-    char *val=nt->right->szData;
-    */
-    //printf("VARIABLE: %s\n", t->szData);
-    printf("VARIABLE %d : %zu --> left=%zu right=%zu data='%s=%s'\n", t->type, t, t->left, t->right, t->szData, t->right->szData);
+    Variable* var = malloc(sizeof(Variable));
+    assert(var != NULL);
+    var->name  = malloc(sizeof(t->szData)+1);
+    assert(var->name != NULL);
+    strcpy(var->name, t->szData);
+    var->value = malloc(sizeof(t->right->szData)+1);
+    assert(var->value != NULL);
+    strcpy(var->value, t->right->szData);
+
+//    printf("VARIABLE %s = '%s'\n", var->name, var->value);
+    var->next = firstVariable;
+    firstVariable = var;
 }
 
 void execute_syntax_tree(Node* t)
